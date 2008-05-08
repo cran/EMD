@@ -2,7 +2,11 @@
 extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20, 
                         stoprule="type1", boundary="periodic", sm="none", spar=NA, weight=20, check=FALSE) {     
     
-    minextrema <- 4
+    if (boundary == "none")
+        minextrema <- 4
+    else
+        minextrema <- 2
+            
     if (sm == "spline" & is.null(spar)) stop("Provide the smoothing parameter of spline smoothing.\n")
     ndata <- length(residue); ndatam1 <- ndata - 1 
     if(is.ts(residue)) 

@@ -18,7 +18,7 @@ emd2d(z, x = NULL, y = NULL, tol = sd(c(z)) * 0.1^2, max.sift = 20,
 \item{boundperc}{expand an image by adding specified percentage of image at the boundary when boundary condition is 'symmetric' or 'reflexive'.}
 \item{max.imf}{the maximum number of IMF's}
 \item{smlevels}{specifies which level of the IMF is obtained by smoothing other than interpolation.}
-\item{weight}{the smoothness of thin plate spline is determined by \code{weight} times smoothing parameter of GCV.}
+\item{weight}{the smoothness of a thin plate spline is determined by \code{weight} times smoothing parameter of GCV.}
 \item{plot.imf}{specifies whether each IMF is displayed. If \code{plot.imf=TRUE}, click the plotting area to start the next step.}
 }
 \details{
