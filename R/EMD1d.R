@@ -64,14 +64,14 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 f <- splinefun(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)))
                 emax <- cbind(emax, f(tt))
             } else if (sm == "spline") {                
-                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lam = spar)
+                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lambda = spar)
                 llambda <- f$lambda * weight 
-                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lam = llambda)
+                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lambda = llambda)
                 llambda <- f$lambda                
                 emin <- cbind(emin, predict(f, tt))
-                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lam = spar)
+                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lambda = spar)
                 ulambda <- f$lambda * weight
-                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lam = ulambda)
+                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lambda = ulambda)
                 ulambda <- f$lambda                
                 emax <- cbind(emax, predict(f, tt)) 
             }
@@ -130,14 +130,14 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 fmax <- splinefun(ttext[maxindex], inputext[maxindex])
                 tmpmax <- fmax(ttext[ndata:(n2data-1)])
             } else if (sm == "spline") { 
-                fmin <- sreg(ttext[minindex], inputext[minindex], lam = spar)
+                fmin <- sreg(ttext[minindex], inputext[minindex], lambda = spar)
                 llambda <- fmin$lambda * weight 
-                fmin <- sreg(ttext[minindex], inputext[minindex], lam = llambda)
+                fmin <- sreg(ttext[minindex], inputext[minindex], lambda = llambda)
                 tmpmin <- predict(fmin, ttext[ndata:(n2data-1)])          
                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lam = spar)
+                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = spar)
                 ulambda <- fmax$lambda * weight                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lam = ulambda)
+                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = ulambda)
                 tmpmax <- predict(fmax, ttext[ndata:(n2data-1)])                        
             } 
          
@@ -174,14 +174,14 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 emaxeven <- f(ttext[1:ndata])
                 #lines(tt2, emaxeven, col=2)
             } else if (sm == "spline") { 
-                fmin <- sreg(ttext[minindex], inputeven[minindex], lam = spar)
+                fmin <- sreg(ttext[minindex], inputeven[minindex], lambda = spar)
                 llambda <- fmin$lambda * weight 
-                fmin <- sreg(ttext[minindex], inputeven[minindex], lam = llambda)
+                fmin <- sreg(ttext[minindex], inputeven[minindex], lambda= llambda)
                 emineven <- predict(fmin, ttext[1:ndata])          
                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lam = spar)
+                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = spar)
                 ulambda <- fmax$lambda * weight                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lam = ulambda)
+                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = ulambda)
                 emaxeven <- predict(fmax, ttext[1:ndata])                        
             }             
             
@@ -202,14 +202,14 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 emaxodd <- f(ttext[1:ndata])
                 #lines(tt2, emaxodd, col=2)
             } else if (sm == "spline") { 
-                fmin <- sreg(ttext[minindex], inputodd[minindex], lam = spar)
+                fmin <- sreg(ttext[minindex], inputodd[minindex], lambda = spar)
                 llambda <- fmin$lambda * weight 
-                fmin <- sreg(ttext[minindex], inputodd[minindex], lam = llambda)
+                fmin <- sreg(ttext[minindex], inputodd[minindex], lambda = llambda)
                 eminodd <- predict(fmin, ttext[1:ndata])          
                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lam = spar)
+                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = spar)
                 ulambda <- fmax$lambda * weight                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lam = ulambda)
+                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = ulambda)
                 emaxodd <- predict(fmax, ttext[1:ndata])                        
             }  
   

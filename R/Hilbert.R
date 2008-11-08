@@ -80,7 +80,7 @@ spectrogram <- function(amplitude, freq, tt=NULL, multi=FALSE, nlevel=NULL, size
     rangefreq <- range(totfreq[, 2])
          
     if(!multi) {
-        tmpim <- as.image(totamp, x = totfreq, nrow = nnrow, ncol = nncol)
+        tmpim <- as.image(c(totamp), x = totfreq, nrow = nnrow, ncol = nncol)
         #tmpim$z[is.na(tmpim$z)] <- 0
         #tmpim$z <- scale(tmpim$z)
         image.plot.ts(tmpim, tt = tt, col = gray(nlevel:0/nlevel), ylim = rangefreq, zlim = rangeamp)  

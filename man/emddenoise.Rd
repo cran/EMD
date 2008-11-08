@@ -22,7 +22,7 @@ emddenoise(xt, tt = NULL, cv.index, cv.level, cv.tol = 0.1^3,
 \item{emd.tol}{tolerance for stopping rule of sifting}
 \item{max.sift}{the maximum number of sifting}
 \item{stoprule}{stopping rule of sifting}
-\item{boundary}{specifies boundary condition}
+\item{boundary}{specifies boundary condition from ``none", ``wave", ``symmetric", ``periodic" or ``evenodd".}
 \item{smlevels}{specifies which level of the IMF is obtained by smoothing other than interpolation.}
 \item{sm}{specifies whether envelop is constructed by smoothing spline.} 
 \item{spar}{specifies user-supplied smoothing parameter of spline.}

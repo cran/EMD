@@ -14,7 +14,7 @@ emd2d(z, x = NULL, y = NULL, tol = sd(c(z)) * 0.1^2, max.sift = 20,
 \item{x, y}{locations of regular grid at which the values in \code{z} are measured}
 \item{tol}{tolerance for stopping rule of sifting}
 \item{max.sift}{the maximum number of sifting}
-\item{boundary}{specifies boundary condition}
+\item{boundary}{specifies boundary condition from ``none", ``symmetric" or ``reflexive".}
 \item{boundperc}{expand an image by adding specified percentage of image at the boundary when boundary condition is 'symmetric' or 'reflexive'.}
 \item{max.imf}{the maximum number of IMF's}
 \item{smlevels}{specifies which level of the IMF is obtained by smoothing other than interpolation.}

@@ -15,7 +15,7 @@ emd(xt, tt=NULL, tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1",
 \item{tol}{tolerance for stopping rule of sifting}
 \item{max.sift}{the maximum number of sifting}
 \item{stoprule}{stopping rule of sifting}
-\item{boundary}{specifies boundary condition}
+\item{boundary}{specifies boundary condition from ``none", ``wave", ``symmetric", ``periodic" or ``evenodd".}
 \item{smlevels}{specifies which level of the IMF is obtained by smoothing other than interpolation.}
 \item{sm}{specifies whether envelop is constructed by smoothing spline.} 
 \item{spar}{specifies user-supplied smoothing parameter of spline.}

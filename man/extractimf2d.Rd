@@ -17,7 +17,7 @@ extractimf2d(residue, x=NULL, y=NULL, nnrow=nrow(residue),
 \item{nncol}{the number of column of an input image}
 \item{tol}{tolerance for stopping rule of sifting}
 \item{max.sift}{the maximum number of sifting}
-\item{boundary}{specifies boundary condition}
+\item{boundary}{specifies boundary condition from ``none", ``symmetric" or ``reflexive".}
 \item{boundperc}{expand an image by adding specified percentage of image at the boundary when boundary condition is 'symmetric' or 'reflexive'.}
 \item{weight}{the smoothness of thin plate spline is determined by \code{weight} times smoothing parameter of GCV.}
 \item{check}{specifies whether the sifting process is displayed. If \code{check=TRUE}, click the plotting area to start the next step.}
