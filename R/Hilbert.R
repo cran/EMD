@@ -123,7 +123,7 @@ image.plot.ts <- function (..., tt, add = FALSE, nlevel = 64, legend.shrink = 0.
         if (!add) {
             par(plt = bigplot)
         }
-        if (class(tt)[1] == "POSIXt") {
+        if (inherits(tt, "POSIXt")) {
             image(..., xaxt = "n", add = add, col = col)
             axis.POSIXct(1, tt)
         }
