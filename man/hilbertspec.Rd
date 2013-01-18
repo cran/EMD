@@ -2,8 +2,8 @@
 \alias{hilbertspec}
 \title{Hilbert Transform and Instantaneous Frequency}
 \description{
-This function calculates teh amplitude and instantaneous frequency
-using Hilbert transforma.
+This function calculates the amplitude and instantaneous frequency
+using Hilbert transform.
 }
 \usage{
 hilbertspec(xt, tt = NULL) 
@@ -13,8 +13,8 @@ hilbertspec(xt, tt = NULL)
 \item{tt}{observation index or time index}
 }
 \details{
-This function calculates teh amplitude and instantaneous frequency
-using Hilbert transforma.
+This function calculates the amplitude and instantaneous frequency
+using Hilbert transform.
 }
 \value{
 \item{amplitude}{matrix of amplitudes for multiple signals \code{xt}}

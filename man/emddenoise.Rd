@@ -1,15 +1,14 @@
 \name{emddenoise}
 \alias{emddenoise}
-\title{Denoising by EMD and Cross-Validation}
+\title{Denoising by EMD and Thresholding}
 \description{
-This function performs denoising by empirical mode decomposition and cross-validation.
+This function performs denoising by empirical mode decomposition and thresholding.
 }
 \usage{
 emddenoise(xt, tt = NULL, cv.index, cv.level, cv.tol = 0.1^3, 
     cv.maxiter = 20, by.imf = FALSE, emd.tol = sd(xt) * 0.1^2, 
     max.sift = 20, stoprule = "type1", boundary = "periodic", 
-    smlevels = c(1), sm = "none", spar = NA, weight = 20, 
-    check = FALSE, max.imf = 10, plot.imf = FALSE, interm = NULL)
+    max.imf = 10)
 }
 \arguments{
 \item{xt}{observation or signal observed at time \code{tt}}
@@ -19,21 +18,17 @@ emddenoise(xt, tt = NULL, cv.index, cv.level, cv.tol = 0.1^3,
 \item{cv.tol}{tolerance for the optimization step of cross-validation}
 \item{cv.maxiter}{maximum iteration for the optimization step of cross-validation}
 \item{by.imf}{specifies whether shrinkage is performed by each IMS or not.} 
-\item{emd.tol}{tolerance for stopping rule of sifting}
+\item{emd.tol}{tolerance for stopping rule of sifting. If \code{stoprule=type5}, the number of iteration for S stoppage criterion.}
 \item{max.sift}{the maximum number of sifting}
-\item{stoprule}{stopping rule of sifting}
-\item{boundary}{specifies boundary condition from ``none", ``wave", ``symmetric", ``periodic" or ``evenodd".}
-\item{smlevels}{specifies which level of the IMF is obtained by smoothing other than interpolation.}
-\item{sm}{specifies whether envelop is constructed by smoothing spline.} 
-\item{spar}{specifies user-supplied smoothing parameter of spline.}
-\item{weight}{the smoothness of spline is determined by \code{weight} times smoothing parameter of GCV.}
-\item{check}{specifies whether the sifting process is displayed.}
+\item{stoprule}{stopping rule of sifting. The \code{type1} stopping rule indicates that absolute values of envelope mean must be less than the user-specified tolerance level 
+in the sense that the local average of upper and lower envelope is zero.
+The stopping rules \code{type2}, \code{type3}, \code{type4} and \code{type5} are the stopping rules given by equation (5.5) of Huang et al. (1998), equation (11a), 
+equation (11b) and S stoppage of Huang and Wu (2008), respectively.} 
+\item{boundary}{specifies boundary condition from ``none", ``wave", ``symmetric", ``periodic" or ``evenodd". See Zeng and He (2004) for \code{evenodd} boundary condition.}
 \item{max.imf}{the maximum number of IMF's}
-\item{plot.imf}{specifies whether each IMF is displayed.}
-\item{interm}{specifies vector of periods to be excluded from the IMF's.}
 }
 \details{
-This function performs denoising by empirical mode decomposition and cross-validation.
+This function performs denoising by empirical mode decomposition and cross-validation. See Kim and Oh (2006) for details.
 }
 \value{ 
 \item{dxt}{denoised signal}
@@ -49,6 +44,14 @@ Zheng, Q., Yen, N. C., Tung, C. C. and Liu, H. H. (1998) The empirical
 mode decomposition and Hilbert spectrum for nonlinear and
 nonstationary time series analysis. \emph{Proceedings of the Royal
 Society London A}, \bold{454}, 903--995.
+
+Huang, N. E. and Wu, Z. (2008) A review on Hilbert-Huang Transform: Method and its applications to geophysical studies.
+\emph{Reviews of Geophysics}, \bold{46}, RG2006.
+
+Kim, D. and Oh, H.-S. (2006) Hierarchical Smoothing Technique by Empirical Mode Decomposition (Korean). \emph{The Korean Journal of Applied Statistics}, \bold{19}, 319--330.
+
+Zeng, K and He, M.-X. (2004) A simple boundary process technique for empirical mode decomposition.
+\emph{Proceedings of 2004 IEEE International Geoscience and Remote Sensing Symposium}, \bold{6}, 4258--4261.
 }
 \seealso{
 \code{\link{cvtype}}, \code{\link{emd}}.

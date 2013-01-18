@@ -5,7 +5,7 @@
 This function generates test dataset index for cross-validation.
 }
 \usage{
-cvtype(n, cv.bsize=1, cv.kfold, cv.random=TRUE)
+cvtype(n, cv.bsize=1, cv.kfold, cv.random=FALSE)
 }
 \arguments{
 \item{n}{the number of observation}
@@ -18,12 +18,15 @@ cvtype(n, cv.bsize=1, cv.kfold, cv.random=TRUE)
 This function provides index of test dataset according to various cross-validation scheme.
 One may construct K test datasets in a way that each testset consists of blocks of b
 consecutive data. Set \code{cv.bsize = b} for this. 
-To select each fold at random, set \code{cv.random = TRUE}.
+To select each fold at random, set \code{cv.random = TRUE}. See Kim et al. (2012) for detalis.
 }
 \value{
-matrix of which row is test dataset index for cross-validation.
+matrix of which row is test dataset index for cross-validation
 }
-
+\references{
+Kim, D., Kim, K.-O. and Oh, H.-S. (2012) Extending the Scope of Empirical Mode Decomposition using Smoothing.
+\emph{EURASIP Journal on Advances in Signal Processing}, \bold{2012:168}, doi: 10.1186/1687-6180-2012-168.
+}
 \examples{
 # Traditional 4-fold cross-validation for 100 observations
 cvtype(n=100, cv.bsize=1, cv.kfold=4, cv.random=FALSE)

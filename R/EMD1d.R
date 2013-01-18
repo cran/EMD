@@ -1,13 +1,15 @@
    
 extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20, 
-                        stoprule="type1", boundary="periodic", sm="none", spar=NA, weight=20, check=FALSE) {     
+                        stoprule="type1", boundary="periodic", sm="none", spar=NULL, alpha=NULL, check=FALSE, weight=NULL) {     
     
     if (boundary == "none")
         minextrema <- 4
     else
         minextrema <- 2
             
-    if (sm == "spline" & is.null(spar)) stop("Provide the smoothing parameter of spline smoothing.\n")
+    if ((sm == "spline" || sm == "kernel" || sm == "locfit") & (is.null(spar) || spar == 0)) stop("Provide the smoothing parameter.\n")
+    #if (sm == "quantile" & is.null(alpha)) stop("Provide the quantile for quantile regression.\n")
+        
     ndata <- length(residue); ndatam1 <- ndata - 1 
     if(is.ts(residue)) 
         residue <- as.numeric(residue) 
@@ -21,6 +23,10 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
     input <- residue; rangext <- range(residue)
     
     j <- 1
+    ### DANIEL BOWMAN'S EDITS JANUARY 15 2013
+    s_count <- 0
+    prev_excross <- 0
+    ### END DANIEL'S EDITS    
     repeat {
         tmp <- extrema(input, ndata, ndatam1)
         
@@ -64,17 +70,26 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 f <- splinefun(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)))
                 emax <- cbind(emax, f(tt))
             } else if (sm == "spline") {                
-                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lambda = spar)
-                llambda <- f$lambda * weight 
-                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lambda = llambda)
-                llambda <- f$lambda                
+                f <- sreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lambda = spar)               
                 emin <- cbind(emin, predict(f, tt))
-                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lambda = spar)
-                ulambda <- f$lambda * weight
-                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lambda = ulambda)
-                ulambda <- f$lambda                
+                f <- sreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lambda = spar)               
                 emax <- cbind(emax, predict(f, tt)) 
-            }
+            #} else if (sm == "quantile") {                
+            #    f <- qsreg(extttminindex, c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4)), lam = spar, alpha=1 - alpha)               
+            #    emin <- cbind(emin, predict(f, tt))
+            #    f <- qsreg(extttmaxindex, c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4)), lam = spar, alpha=alpha)
+            #    emax <- cbind(emax, predict(f, tt)) 
+            } else if (sm == "kernel") {
+                f <- loess(yy~xx, data.frame(xx=extttminindex, yy=c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4))), span=spar, family = "gaussian", degree=2, control=loess.control(surface="direct"))               
+                emin <- cbind(emin, predict(f, data.frame(xx=tt))) 
+                f <- loess(yy~xx, data.frame(xx=extttmaxindex, yy=c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4))), span=spar, family = "gaussian", degree=2, control=loess.control(surface="direct"))  
+                emax <- cbind(emax, predict(f, data.frame(xx=tt)))
+            } else if (sm == "locfit") {
+                f <- locfit(yy~xx, data=data.frame(xx=extttminindex, yy=c(rep(input[extminindex[1]], 4), input[extminindex], rep(input[extminindex[extminn]], 4))), deg=3, kern="gauss", alpha=spar)
+                emin <- cbind(emin, predict(f, data.frame(xx=tt)))     
+                f <- locfit(yy~xx, data=data.frame(xx=extttmaxindex, yy=c(rep(input[extmaxindex[1]], 4), input[extmaxindex], rep(input[extmaxindex[extmaxn]], 4))), deg=3, kern="gauss", alpha=spar)
+                emax <- cbind(emax, predict(f, data.frame(xx=tt)))
+            } 
             
             em <- cbind(em, (emin[,j] + emax[,j]) / 2)
             
@@ -91,11 +106,37 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
             minindex <- c(1, unique(c(t(tmp$minindex))), ndata)
             maxindex <- c(1, unique(c(t(tmp$maxindex))), ndata)  
         
-            fmin <- splinefun(tt[minindex], input[minindex])
-            emin <- cbind(emin, fmin(tt))
+            if(sm == "none") {  
+                fmin <- splinefun(tt[minindex], input[minindex])
+                emin <- cbind(emin, fmin(tt))
         
-            fmax <- splinefun(tt[maxindex], input[maxindex])
-            emax <- cbind(emax, fmax(tt))
+                fmax <- splinefun(tt[maxindex], input[maxindex])
+                emax <- cbind(emax, fmax(tt))
+            } else if (sm == "spline") {              
+                f <- sreg(tt[minindex], input[minindex], lambda = spar)               
+                emin <- cbind(emin, predict(f, tt))
+                
+                f <- sreg(tt[maxindex], input[maxindex], lambda = spar)
+                emax <- cbind(emax, predict(f, tt)) 
+            #} else if (sm == "quantile") {                
+            #    f <- qsreg(tt[minindex], input[minindex], lam = spar, alpha=1 - alpha)               
+            #    emin <- cbind(emin, predict(f, tt))
+            #    
+            #    f <- qsreg(tt[maxindex], input[maxindex], lam = spar, alpha=alpha)
+            #    emax <- cbind(emax, predict(f, tt)) 
+            } else if (sm == "kernel") {
+                f <- loess(yy~xx, data.frame(xx=tt[minindex], yy=input[minindex]), span=spar, family = "gaussian", degree=2, control=loess.control(surface="direct"))               
+                emin <- cbind(emin, predict(f, data.frame(xx=tt)))
+                
+                f <- loess(yy~xx, data.frame(xx=tt[maxindex], yy=input[maxindex]), span=spar, family = "gaussian", degree=2, control=loess.control(surface="direct"))  
+                emax <- cbind(emax, predict(f, data.frame(xx=tt)))
+            } else if (sm == "locfit") {
+                f <- locfit(yy~xx, data=data.frame(xx=tt[minindex], yy=input[minindex]), deg=3, kern="gauss", alpha=spar)
+                emin <- cbind(emin, predict(f, data.frame(xx=tt)))
+                
+                f <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=input[maxindex]), deg=3, kern="gauss", alpha=spar)
+                emax <- cbind(emax, predict(f, data.frame(xx=tt)))
+            } 
             
             em <- cbind(em, (emin[,j] + emax[,j]) / 2)    
                    
@@ -119,9 +160,7 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 tmp <- extrema(inputext, n3data - 2, n3data - 3)            
             }           
             minindex <- unique(c(t(tmp$minindex)))
-            #minindex <- minindex[minindex <= n2data + minindex[1]]
             maxindex <- unique(c(t(tmp$maxindex)))
-            #maxindex <- maxindex[maxindex <= n2data + maxindex[1]]   
                         
             if(sm == "none") {     
                 fmin <- splinefun(ttext[minindex], inputext[minindex])
@@ -131,14 +170,28 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 tmpmax <- fmax(ttext[ndata:(n2data-1)])
             } else if (sm == "spline") { 
                 fmin <- sreg(ttext[minindex], inputext[minindex], lambda = spar)
-                llambda <- fmin$lambda * weight 
-                fmin <- sreg(ttext[minindex], inputext[minindex], lambda = llambda)
                 tmpmin <- predict(fmin, ttext[ndata:(n2data-1)])          
                 
                 fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = spar)
-                ulambda <- fmax$lambda * weight                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = ulambda)
                 tmpmax <- predict(fmax, ttext[ndata:(n2data-1)])                        
+            #} else if (sm == "quantile") { 
+            #    fmin <- qsreg(ttext[minindex], inputext[minindex], lam = spar, alpha=1 - alpha)
+            #    tmpmin <- predict(fmin, ttext[ndata:(n2data-1)])          
+            #   
+            #    fmax <- qsreg(ttext[maxindex], inputext[maxindex], lam = spar, alpha=alpha)
+            #    tmpmax <- predict(fmax, ttext[ndata:(n2data-1)])                        
+            } else if (sm == "kernel") {                
+                fmin <- loess(yy ~ xx, data.frame(xx=ttext[minindex], yy=inputext[minindex]), span=spar, family = "gaussian", degree=3, control=loess.control(surface="direct"))               
+                tmpmin <- predict(fmin, data.frame(xx=ttext[ndata:(n2data-1)]))
+                
+                fmax <- loess(yy ~ xx, data.frame(xx=ttext[maxindex], yy=inputext[maxindex]), span=spar, family = "gaussian", degree=3, control=loess.control(surface="direct")) 
+                tmpmax <- predict(fmax, data.frame(xx=ttext[ndata:(n2data-1)]))
+            } else if (sm == "locfit") {
+                fmin <- locfit(yy~xx, data=data.frame(xx=ttext[minindex], yy=inputext[minindex]), deg=3, kern="gauss", alpha=spar)
+                tmpmin <- cbind(fmin, predict(f, data.frame(xx=ttext[ndata:(n2data-1)])))
+                
+                fmax <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=input[maxindex]), deg=3, kern="gauss", alpha=spar)
+                tmpmax <- cbind(fmax, predict(f, data.frame(xx=ttext[ndata:(n2data-1)])))
             } 
          
             emin <- cbind(emin, tmpmin[1:ndata])
@@ -175,15 +228,29 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 #lines(tt2, emaxeven, col=2)
             } else if (sm == "spline") { 
                 fmin <- sreg(ttext[minindex], inputeven[minindex], lambda = spar)
-                llambda <- fmin$lambda * weight 
-                fmin <- sreg(ttext[minindex], inputeven[minindex], lambda= llambda)
                 emineven <- predict(fmin, ttext[1:ndata])          
                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = spar)
-                ulambda <- fmax$lambda * weight                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = ulambda)
+                fmax <- sreg(ttext[maxindex], inputeven[maxindex], lambda = spar)
                 emaxeven <- predict(fmax, ttext[1:ndata])                        
-            }             
+            #} else if (sm == "quantile") { 
+            #    fmin <- qsreg(ttext[minindex], inputeven[minindex], lam = spar, alpha=1 - alpha)
+            #    emineven <- predict(fmin, ttext[1:ndata])          
+            #   
+            #    fmax <- qsreg(ttext[maxindex], inputeven[maxindex], lam = spar, alpha=alpha)
+            #    emaxeven <- predict(fmax, ttext[1:ndata])                        
+            }  else if (sm == "kernel") {                
+                fmin <- loess(yy ~ xx, data.frame(xx=ttext[minindex], yy=inputeven[minindex]), span=spar, family = "gaussian", degree=3, control=loess.control(surface="direct"))               
+                emineven <- predict(fmin, data.frame(xx=ttext[1:ndata]))
+                
+                fmax <- loess(yy ~ xx, data.frame(xx=ttext[maxindex], yy=inputeven[maxindex]), span=spar, family = "gaussian", degree=3, control=loess.control(surface="direct")) 
+                emaxeven <- predict(fmax, data.frame(xx=ttext[1:ndata]))
+            } else if (sm == "locfit") {
+                fmin <- locfit(yy~xx, data=data.frame(xx=ttext[minindex], yy=inputeven[minindex]), deg=3, kern="gauss", alpha=spar)
+                emineven <- cbind(fmin, predict(f, data.frame(xx=ttext[1:ndata])))
+                
+                fmax <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=inputeven[maxindex]), deg=3, kern="gauss", alpha=spar)
+                emaxeven <- cbind(fmax, predict(f, data.frame(xx=ttext[1:ndata])))             
+            }
             
             inputodd <- c(input, -rev(input), input)
             tmp <- extrema(inputodd, n3data, n3datam1) 
@@ -203,15 +270,29 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 #lines(tt2, emaxodd, col=2)
             } else if (sm == "spline") { 
                 fmin <- sreg(ttext[minindex], inputodd[minindex], lambda = spar)
-                llambda <- fmin$lambda * weight 
-                fmin <- sreg(ttext[minindex], inputodd[minindex], lambda = llambda)
                 eminodd <- predict(fmin, ttext[1:ndata])          
                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = spar)
-                ulambda <- fmax$lambda * weight                 
-                fmax <- sreg(ttext[maxindex], inputext[maxindex], lambda = ulambda)
+                fmax <- sreg(ttext[maxindex], inputodd[maxindex], lambda = spar)
                 emaxodd <- predict(fmax, ttext[1:ndata])                        
-            }  
+            #} else if (sm == "quantile") { 
+            #    fmin <- qsreg(ttext[minindex], inputodd[minindex], lam = spar, alpha=1 - alpha)
+            #    eminodd <- predict(fmin, ttext[1:ndata])            
+            #   
+            #    fmax <- qsreg(ttext[maxindex], inputodd[maxindex], lam = spar, alpha=alpha)
+            #    emaxodd <- predict(fmax, ttext[1:ndata])                        
+            } else if (sm == "kernel") {                
+                fmin <- loess(yy ~ xx, data.frame(xx=ttext[minindex], yy=inputodd[minindex]), span=spar, family = "gaussian", degree=3, control=loess.control(surface="direct"))               
+                eminodd <- predict(fmin, data.frame(xx=ttext[1:ndata]))
+                
+                fmax <- loess(yy ~ xx, data.frame(xx=ttext[maxindex], yy=inputodd[maxindex]), span=spar, family = "gaussian", degree=3, control=loess.control(surface="direct")) 
+                emaxodd <- predict(fmax, data.frame(xx=ttext[1:ndata]))
+            } else if (sm == "locfit") {
+                fmin <- locfit(yy~xx, data=data.frame(xx=ttext[minindex], yy=inputodd[minindex]), deg=3, kern="gauss", alpha=spar)
+                eminodd <- cbind(fmin, predict(f, data.frame(xx=ttext[1:ndata])))
+                
+                fmax <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=inputodd[maxindex]), deg=3, kern="gauss", alpha=spar)
+                emaxodd <- cbind(fmax, predict(f, data.frame(xx=ttext[1:ndata])))             
+            } 
   
             emin <- cbind(emin, (emineven+eminodd)/2)
             emax <- cbind(emax, (emaxeven+emaxodd)/2)
@@ -232,16 +313,38 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
             imf <- h[,j]
             residue <- residue - imf
             break
-        }
-                        
-        if (stoprule == "type2" && j >= 2) {
+        } else if (stoprule == "type2" && j >= 2) {
             if (sum((h[2:ndatam1, j-1]-h[2:ndatam1, j])^2/h[2:ndatam1, j-1]^2) < tol || j >= max.sift) { 
                 imf <- h[,j]
                 residue <- residue - imf
                 break
                 }
+        } else if (stoprule == "type3" && j >= 2) {
+            if (sum((h[, j-1]-h[, j])^2)/sum(h[, j-1]^2) < tol || j >= max.sift) { 
+                imf <- h[,j]
+                residue <- residue - imf
+                break
+                }
+        } else if (stoprule == "type4") {
+             if (sum((em[, j])^2)/sum(h[, j]^2) < tol || j >= max.sift) {  
+                imf <- h[,j]
+                residue <- residue - imf
+                break
+                }
+        } #DANIEL BOWMAN'S EDITS, JANUARY 15 2013
+	else if (stoprule == "type5" && j >= 2) { 
+             if (abs(tmp$nextreme - tmp$ncross) <= 1 && tmp$nextreme+tmp$ncross == prev_excross) {
+                 s_count <- s_count+1
+                 if (s_count >= tol || j >= max.sift) {
+                     imf <- h[,j]
+                     residue <- residue - imf
+                     break
+                }
+            }
+            prev_excross <- tmp$nextreme+tmp$ncross
         }
-           
+        #END DANIEL'S EDITS
+        
         input <- h[,j]
        
         j <- j+1
@@ -251,10 +354,9 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
     list(imf=imf, residue=residue, niter=j)
 }
 
-
 emd <- function(xt, tt=NULL, tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", boundary="periodic", 
-                smlevels=c(1), sm="none", spar=NA, weight=20, 
-                check=FALSE, max.imf=10, plot.imf=TRUE, interm=NULL) {
+                sm="none", smlevels=c(1), spar=NULL, alpha=NULL, 
+                check=FALSE, max.imf=10, plot.imf=FALSE, interm=NULL, weight=NULL) {
 
     if(is.ts(xt))
         xt <- as.numeric(xt) 
@@ -262,40 +364,42 @@ emd <- function(xt, tt=NULL, tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", bo
     if(is.null(tt)) tt <- 1:length(xt)
         
     if(is.null(interm) || all(interm <= 0)) intermtest <- FALSE else intermtest <- TRUE
+
+    if (sm == "spline" || sm == "kernel" || sm == "locfit") {
+        if (is.null(spar) || spar == 0) stop("Provide the smoothing parameter.\n")
+        else if (length(spar) == 1)
+            spar <- rep(spar, length(smlevels))  
+        else if (length(smlevels) != length(spar)) stop("Provide the smoothing parameter.\n")
+    #} else if (sm == "quantile") {
+    #    if (is.null(alpha)) stop("Provide the quantile for quantile regression.\n")
+    #    else if (length(alpha) == 1)
+    #        alpha <- rep(alpha, length(smlevels))  
+    #    else if (length(smlevels) != length(alpha)) stop("Provide the quantile for quantile regression.\n")
+    }          
+
     ndata <- length(xt); ndatam1 <- ndata - 1
     residue <- xt; rangext <- range(residue)
     imf <- NULL
     
     j <- 1
     
-    #firstimf <- extractimf(residue, tt, tol, max.sift, 
-    #                        stoprule=stoprule, boundary=boundary, check=check)$imf
-    #if(!is.null(firstimf)) rangeimf <- range(firstimf)
-    
     repeat {
         if (j > max.imf) break
-        if ((any(j == smlevels) || smlevels == "all") & sm == "spline")
+        if ((any(j == smlevels)) & (sm == "spline" || sm == "kernel" || sm == "locfit")) #|| sm == "quantile" 
             tmp <- extractimf(residue, tt, tol, max.sift, 
-                            stoprule=stoprule, boundary=boundary, sm=sm, spar=spar, check=check) else
-        #else
+                            stoprule=stoprule, boundary=boundary, sm=sm, spar=spar[j], alpha=alpha[j], check=check, weight=NULL) else 
             tmp <- extractimf(residue, tt, tol, max.sift, 
-                            stoprule=stoprule, boundary=boundary, check=check) 
-#        if(j == 1 && !is.null(tmp$imf)) rangeimf <- range(tmp$imf)         
-#        if (tmpstop$nextreme == 0 || tmpstop$ncross == 0 || tmpstop$nextreme != tmpstop$ncross ||
-#            tmpstop$nextreme != (tmpstop$ncross+1) || j >= max.imf) {
-#            break
-#        }
-        if (is.null(tmp$imf)) {
+                            stoprule=stoprule, boundary=boundary, sm="none", check=check) 
+
+        if (is.null(tmp$imf))
             break
-        }
         
         if(plot.imf) {
-            plot(tt, residue, type="l", xlab="", ylab="", #ylim=rangext,
-                main=paste(j-1, "-th residue=", j, "-th imf+", j, "-th residue", sep="")); abline(h=0)
-        }     
-
-        if(intermtest && length(interm) >= j && interm[j] > 0) {
-            
+            plot(tt, residue, type="l", xlab="", ylab="",
+                main=paste(j-1, "-th residue=", j, "-th imf+", j, "-th residue", sep="")); abline(h=0)    
+        }
+        
+        if(intermtest && length(interm) >= j && interm[j] > 0) {  
             tmpimf <- tmp$imf
             tmpresidue <- tmp$residue
 
@@ -336,9 +440,9 @@ emd <- function(xt, tt=NULL, tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", bo
         residue <- tmp$residue     
              
         if(plot.imf) {
-            plot(tt, imf[,j], type="l", xlab="", ylab="", #ylim=rangeimf, 
+            plot(tt, imf[,j], type="l", xlab="", ylab="", 
                 main=paste(j, "-th imf", sep="")); abline(h=0)
-            plot(tt, residue, type="l", xlab="", ylab="", #ylim=rangext, 
+            plot(tt, residue, type="l", xlab="", ylab="",
                 main=paste(j, "-th residue", sep="")); abline(h=0); locator(1)
         }
         
@@ -423,9 +527,7 @@ extrema <- function(y, ndata = length(y), ndatam1 = ndata - 1) {
 emddenoise <- function(
 xt, tt=NULL, 
 cv.index, cv.level, cv.tol=0.1^3, cv.maxiter=20, by.imf=FALSE,
-emd.tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", boundary="periodic", 
-smlevels=c(1), sm="none", spar=NA, weight=20, 
-check=FALSE, max.imf=10, plot.imf=FALSE, interm=NULL)
+emd.tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", boundary="periodic", max.imf=10)
 {
 ### Golden section search.
 
@@ -437,7 +539,7 @@ check=FALSE, max.imf=10, plot.imf=FALSE, interm=NULL)
     ndata <- length(xt)
     cv.kfold <- nrow(cv.index)
 
-    tmpemd <- emd(xt, tt, emd.tol, max.sift, stoprule, boundary, smlevels, sm, spar, weight, check, max.imf, plot.imf, interm)  
+    tmpemd <- emd(xt, tt, emd.tol, max.sift, stoprule, boundary, sm="none", check=FALSE, max.imf=max.imf, plot.imf=FALSE)  
     tmpnimf <- tmpemd$nimf
         
     cv.ndim <- min(cv.level, tmpnimf)
@@ -463,7 +565,7 @@ if(by.imf) {
             predxt <- tmpxt <- xt
             for (k in 1:cv.kfold) {                
                 cvemd <- emd(xt[-cv.index[k,]], tt[-cv.index[k,]], emd.tol, max.sift, 
-                                stoprule, boundary, smlevels, sm, spar, weight, check, max.imf=cv.ndim, plot.imf, interm)
+                                stoprule, boundary, sm="none", check=FALSE, max.imf=max.imf, plot.imf=FALSE)  
                 for (m in 1:cv.ndim)
                     cvemd$imf[,m] <- cvemd$imf[,m] * (abs(cvemd$imf[,m]) > optlambda[m])
                 tmpxt[-cv.index[k,]] <- apply(cvemd$imf, 1, sum) + cvemd$residue
@@ -483,7 +585,7 @@ if(by.imf) {
             predxt <- tmpxt <- xt
             for (k in 1:cv.kfold) {                
                 cvemd <- emd(xt[-cv.index[k,]], tt[-cv.index[k,]], emd.tol, max.sift, 
-                                stoprule, boundary, smlevels, sm, spar, weight, check, max.imf=cv.ndim, plot.imf, interm)
+                                stoprule, boundary, sm="none", check=FALSE, max.imf=max.imf, plot.imf=FALSE)  
                 for (m in 1:cv.ndim)
                     cvemd$imf[,m] <- cvemd$imf[,m] * (abs(cvemd$imf[,m]) > optlambda[m])
                 tmpxt[-cv.index[k,]] <- apply(cvemd$imf, 1, sum) + cvemd$residue
@@ -546,7 +648,7 @@ if(by.imf) {
             predxt <- tmpxt <- xt
             for (k in 1:cv.kfold) {                
                 cvemd <- emd(xt[-cv.index[k,]], tt[-cv.index[k,]], emd.tol, max.sift, 
-                                stoprule, boundary, smlevels, sm, spar, weight, check, max.imf, plot.imf, interm)
+                                stoprule, boundary, sm="none", check=FALSE, max.imf=max.imf, plot.imf=FALSE)  
                 for (m in 1:cv.ndim)
                     cvemd$imf[,m] <- cvemd$imf[,m] * (abs(cvemd$imf[,m]) > optlambda[1])
                 tmpxt[-cv.index[k,]] <- apply(cvemd$imf, 1, sum) + cvemd$residue
@@ -566,7 +668,7 @@ if(by.imf) {
             predxt <- tmpxt <- xt
             for (k in 1:cv.kfold) {                
                 cvemd <- emd(xt[-cv.index[k,]], tt[-cv.index[k,]], emd.tol, max.sift, 
-                                stoprule, boundary, smlevels, sm, spar, weight, check, max.imf, plot.imf, interm)
+                                stoprule, boundary, sm="none", check=FALSE, max.imf=max.imf, plot.imf=FALSE)  
                 for (m in 1:cv.ndim)
                     cvemd$imf[,m] <- cvemd$imf[,m] * (abs(cvemd$imf[,m]) > optlambda[1])
                 tmpxt[-cv.index[k,]] <- apply(cvemd$imf, 1, sum) + cvemd$residue
@@ -625,7 +727,7 @@ if(by.imf) {
 }
 
 cvtype <-
-function (n, cv.bsize = 1, cv.kfold, cv.random = TRUE) 
+function (n, cv.bsize = 1, cv.kfold, cv.random = FALSE) 
 {
     if (n < cv.bsize * cv.kfold) 
         stop("Block size or no. of fold is too large.")
@@ -677,4 +779,203 @@ emd.pred <- function(varpred, trendpred, ci=0.95, figure = TRUE)
         lines(1:n.ahead, lower, lty = 2, col = "blue")
     }
     list(fcst = fcst, lower = lower, upper = upper)
+}
+
+semd <- function(xt, tt=NULL, cv.kfold, cv.tol=0.1^1, cv.maxiter=20, 
+emd.tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", boundary="periodic", 
+smlevels=1, max.imf=10)
+{
+### Golden section search.
+    sm <- "spline"
+    
+    if(is.ts(xt))
+        xt <- as.numeric(xt) 
+
+    if(is.null(tt)) tt <- 1:length(xt)
+        
+    ndata <- length(xt)
+
+    cv.index <- cvtype(ndata, 1, cv.kfold)$cv.index
+
+    cv.ndim <- min(length(smlevels), max.imf)
+
+    tmp <- sreg(tt, xt)
+    spar <- tmp$lambda
+   
+    if (cv.ndim != 1) {
+        tmplambda <- tmp$lambda
+        tmpresidue <- xt
+        
+        for (i in 1:(cv.ndim-1)) {
+            tmpemd <- emd(tmpresidue, tt, emd.tol, max.sift, stoprule, boundary, sm=sm, smlevels=1, spar=tmplambda, alpha=NULL, check=FALSE, max.imf=1, plot.imf=FALSE, interm=NULL, weight=NULL) 
+
+            if (is.null(tmpemd$imf)) 
+                break
+        
+            tmpresidue <- tmpemd$residue
+            tmplambda <- sreg(tt, tmpresidue)$lambda
+            spar <- c(spar, tmplambda)
+        }    ### impute by local mean
+        cv.ndim <- min(length(spar), max.imf)
+    }
+
+    if (cv.ndim == 1) by.imf <- FALSE
+    else by.imf <- TRUE
+
+    imputext <- cvimpute.by.mean(y=xt, impute.index=cv.index)$yimpute
+    
+    R <- (sqrt(5)-1)/2 #0.61803399000000003
+    C <- 1 - R
+    lambda.range <- c(0.1, 80)
+    
+    if(by.imf) {
+        lambda <- matrix(0, 4, cv.ndim)  
+    
+        lambda[1, ] <- lambda.range[1] * spar
+        lambda[4, ] <- lambda.range[2] * spar   
+        lambda[2, ] <- lambda[4, ]/2
+        lambda[3, ] <- lambda[2, ] + C * (lambda[4, ] - lambda[2, ])    
+
+        perr <- lambdaconv <- NULL 
+        optlambda <- lambda[3, ]
+
+        j <- 0
+        repeat{
+
+            for (i in 1:cv.ndim) {                                
+                optlambda[i] <- lambda[2, i]
+                predxt <- xt
+                for (k in 1:cv.kfold) {
+                    tmpxt <- xt
+                    tmpxt[cv.index[k,]] <- imputext[cv.index[k,]]
+                    cvemd <- emd(tmpxt, tt, emd.tol, max.sift, 
+                                stoprule, boundary, sm=sm, smlevels=1:cv.ndim, spar=optlambda, alpha=NULL, check=FALSE, max.imf=cv.ndim, plot.imf=FALSE, interm=NULL, weight=NULL)
+
+                    predxt[cv.index[k,]] <- apply(cvemd$imf[,-(1:cv.ndim)], 1, sum)[cv.index[k,]] + cvemd$residue[cv.index[k,]]
+                }
+                f2 <- mean((predxt - xt)^2)
+                
+                optlambda[i] <- lambda[3, i]
+                predxt <- xt
+                for (k in 1:cv.kfold) {
+                    tmpxt <- xt
+                    tmpxt[cv.index[k,]] <- imputext[cv.index[k,]]
+                    cvemd <- emd(tmpxt, tt, emd.tol, max.sift, 
+                                stoprule, boundary, sm=sm, smlevels=1:cv.ndim, spar=optlambda, alpha=NULL, check=FALSE, max.imf=cv.ndim, plot.imf=FALSE, interm=NULL, weight=NULL)
+
+                    predxt[cv.index[k,]] <- apply(cvemd$imf[,-(1:cv.ndim)], 1, sum)[cv.index[k,]] + cvemd$residue[cv.index[k,]]
+                }
+                f3 <- mean((predxt - xt)^2)
+                        
+                if(f3 < f2) {
+                    optlambda[i] <- lambda[3, i] 
+                    optf <- f3
+                    lambda[1, i] <- lambda[2, i]
+                    lambda[2, i] <- lambda[3, i]
+                    lambda[3, i] <- R * lambda[2, i] + C * lambda[4, i]
+                }
+                else {
+                    optlambda[i] <- lambda[2, i]
+                    optf <- f2
+                    lambda[4, i] <- lambda[3, i]
+                    lambda[3, i] <- lambda[2, i]
+                    lambda[2, i] <- R * lambda[3, i] + C * lambda[1, i]
+                } 
+                perr <- c(perr, optf)  
+                lambdaconv <- rbind(lambdaconv, optlambda)
+            }
+        
+            stopping <- NULL
+            for (i in 1:cv.ndim) 
+                stopping <- c(stopping, abs(lambda[4, i] - lambda[1, i]) / (abs(lambda[2, i]) + abs(lambda[3, i])))
+
+            #if (all(stopping < cv.tol) || abs(perr[cv.ndim*(j+1)+1]-perr[cv.ndim*j+1])/perr[cv.ndim*j+1] < cv.tol || j > cv.maxiter) break 
+            if (all(stopping < cv.tol) || j > cv.maxiter) break 
+
+            j <- j + 1 
+        }
+    } else {
+        lambda <- matrix(0, 4, 1)  
+    
+        lambda[1, ] <- lambda.range[1] * spar
+        lambda[4, ] <- lambda.range[2] * spar
+        lambda[2, ] <- lambda[4, ]/2
+        lambda[3, ] <- lambda[2, ] + C * (lambda[4, ] - lambda[2, ])    
+
+        perr <- lambdaconv <- NULL 
+        optlambda <- lambda[3, ]
+        
+        j <- 0
+
+        repeat{
+            optlambda[1] <- lambda[2, 1]
+            predxt <- xt
+            for (k in 1:cv.kfold) {
+                tmpxt <- xt
+                tmpxt[cv.index[k,]] <- imputext[cv.index[k,]]
+                cvemd <- emd(tmpxt, tt, emd.tol, max.sift, 
+                                stoprule, boundary, sm=sm, smlevels=1, spar=optlambda[1], alpha=NULL, check=FALSE, max.imf=1, plot.imf=FALSE, interm=NULL, weight=NULL)
+
+                predxt[cv.index[k,]] <- cvemd$residue[cv.index[k,]]
+            }
+            f2 <- mean((predxt - xt)^2)
+                
+            optlambda[1] <- lambda[3, 1]
+            predxt <- xt
+            for (k in 1:cv.kfold) {
+                tmpxt <- xt
+                tmpxt[cv.index[k,]] <- imputext[cv.index[k,]]
+                cvemd <- emd(tmpxt, tt, emd.tol, max.sift, 
+                                stoprule, boundary, sm=sm, smlevels=1, spar=optlambda[1], alpha=NULL, check=FALSE, max.imf=1, plot.imf=FALSE, interm=NULL, weight=NULL)
+
+                predxt[cv.index[k,]] <- cvemd$residue[cv.index[k,]]
+            }
+            f3 <- mean((predxt - xt)^2)
+                        
+            if(f3 < f2) {
+                optlambda[1] <- lambda[3, 1] 
+                optf <- f3
+                lambda[1, 1] <- lambda[2, 1]
+                lambda[2, 1] <- lambda[3, 1]
+                lambda[3, 1] <- R * lambda[2, 1] + C * lambda[4, 1]
+            } else {
+                optlambda[1] <- lambda[2, 1]
+                optf <- f2
+                lambda[4, 1] <- lambda[3, 1]
+                lambda[3, 1] <- lambda[2, 1]
+                lambda[2, 1] <- R * lambda[3, 1] + C * lambda[1, 1]
+            } 
+            perr <- c(perr, optf)  
+            lambdaconv <- rbind(lambdaconv, optlambda)
+        
+            stopping <- abs(lambda[4, 1] - lambda[1, 1]) / (abs(lambda[2, 1]) + abs(lambda[3, 1]))
+            if (stopping < cv.tol || j > cv.maxiter) break
+            #if (j >= 1)
+            #if (abs(perr[j+1]-perr[j])/perr[j] < cv.tol || j > cv.maxiter) break 
+            
+            j <- j + 1 
+        }
+    }   
+
+    out <- emd(xt, tt, emd.tol, max.sift, stoprule, boundary, sm=sm, smlevels=1:length(optlambda), spar=optlambda, alpha=NULL, check=FALSE, max.imf, plot.imf=FALSE, interm=NULL, weight=NULL)
+    
+    list(imf=out$imf, residue=out$residue, nimf=out$nimf, optlambda=optlambda, lambdaconv=lambdaconv, perr=perr)  
+}
+
+
+cvimpute.by.mean <- function(y, impute.index)
+{
+    n <- length(y)
+    impute.nrep <- nrow(impute.index)
+    yimpute <- y
+
+    for (k in 1:impute.nrep) {
+        tmpyimpute <- y
+        tmpyimpute[impute.index[k,]] <- NA
+        tmpyimpute <- c(y[2], tmpyimpute, y[n-1])
+        tmpyimpute <- apply(embed(tmpyimpute, 3), 1, mean, na.rm=TRUE) 
+        yimpute[impute.index[k,]] <- tmpyimpute[impute.index[k,]]
+    } # End of k-th impute loop
+
+    return(list(yimpute=yimpute))
 }

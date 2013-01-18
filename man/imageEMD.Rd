@@ -1,8 +1,8 @@
 \name{imageEMD}
 \alias{imageEMD}
-\title{Plot of Two Dimensional Decomposition Result}
+\title{Plot of Bidimenasional Empirical Mode Decomposition Result}
 \description{
-This function performs plotting of input image, IMF's, residue and extrema.
+This function draws plots of input image, IMF's, residue and extrema.
 }
 \usage{
 imageEMD(z = z, emdz, extrema = FALSE, \dots)
@@ -14,7 +14,7 @@ imageEMD(z = z, emdz, extrema = FALSE, \dots)
 \item{\dots}{the usual arguments to the image function}
 }
 \details{
-This function performs plotting of input image, IMF's, residue and extrema.
+This function draws plots of input image, IMF's, residue and extrema.
 }
 \examples{
 data(lena)

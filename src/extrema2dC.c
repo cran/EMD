@@ -715,3 +715,110 @@ static int outerC(int *A, int nA, int *B, int nB, int *OUTER)
     nOUTER = setdiffC(OUTER, nOUTER, A, nA);
     return(nOUTER);
 }
+
+void extrema2dVC(double *zz, int *nnrow, int *nncol,
+              int *maxindex, int *nnmax, int *ttotalmax, int *minindex, int *nnmin, int *ttotalmin, int *vertex) 
+{
+    int nrow = *nnrow, ncol = *nncol, nvert = nrow * ncol;
+    int i, j, nbound=2*(nrow+ncol-2), ninterior, npatch, nneighbor, nmax, nmin, totalmax, totalmin;
+    
+    /* int nb[8]    = {1, ncol-2,      1, nrow-2,           1,     ncol-2,              1,        nrow-2};  */
+    int cumnb[8] = {0,      1, ncol-1,   ncol, ncol+nrow-2, ncol+nrow-1, 2*ncol+nrow-3, 2*ncol+nrow-2};    
+ 
+    int *vertexbound = (int *) R_alloc(nbound, sizeof(int));
+            
+    vertexbound[cumnb[0]] = 0;   
+    for (i=1; i<=(ncol-2); i++) vertexbound[cumnb[0]+i] = nrow * i; 
+    vertexbound[cumnb[2]] = nrow * (ncol-1);   
+    for (i=1; i<=(nrow-2); i++) vertexbound[cumnb[2]+i] = i + nrow * (ncol - 1); 
+    vertexbound[cumnb[4]] = nrow - 1 + nrow * (ncol - 1);   
+    for (i=1; i<=(ncol-2); i++) vertexbound[cumnb[4]+i] = nrow - 1 + nrow * i; 
+    vertexbound[cumnb[6]] = nrow - 1;   
+    for (i=1; i<=(nrow-2); i++) vertexbound[cumnb[6]+i] = i; 
+                  
+    /*int *vertex = (int *) R_alloc(nvert, sizeof(int)); */
+    int *uvertex = (int *) R_alloc(nvert, sizeof(int));
+    
+    /*  if(vertex != NULL) Rprintf("%c memory for vertex \n", 1);   */
+    /*  if(uvertex != NULL) Rprintf("%c memory for unique \n", 1);  */
+    /*  Rprintf("%d\n", i); */
+            
+    /* Finding equivalence class induced by neighborhood relation */ 
+    /* Neighborhood is defined if horizontal, vertical, diagonal adjacent pixels are the same. */
+    /* Partition the image by Rem's algorithm */
+     
+    findclassC(zz, nrow, ncol, vertex);
+
+    for (i=0; i<nvert; i++)
+        uvertex[i] = vertex[i];
+        
+    /* Finding neighbors of patches including boundary vertex. */
+
+    for (i=0; i<nbound; i++) 
+        vertexbound[i] = vertex[vertexbound[i]];
+
+    nbound = uniqueC(vertexbound, nbound);
+    
+    nmax = 0;
+    nmin = 0;
+    totalmax = 0;
+    totalmin = 0;
+   
+    int *patch = (int *) R_alloc(nvert, sizeof(int));
+    int *neighbor = (int *) R_alloc(nvert, sizeof(int));
+       
+    for (i=0; i<nbound; i++) {
+        npatch = findindexC(vertex, nvert, vertexbound[i], patch);       
+        nneighbor = neighborC(patch, npatch, nrow, ncol, 0, neighbor);
+        if (nneighbor > 0) {
+            if(allC(zz, neighbor, nneighbor, zz[patch[0]]) == nneighbor) {
+                for (j=0; j<npatch; j++) 
+                    maxindex[totalmax + j] = patch[j];
+                    
+                totalmax = totalmax + npatch;
+                nmax = nmax + 1;
+            }
+            else if(allC(zz, neighbor, nneighbor, zz[patch[0]]) == -nneighbor) {
+                for (j=0; j<npatch; j++) 
+                    minindex[totalmin + j] = patch[j];
+                                  
+                totalmin = totalmin + npatch;
+                nmin = nmin + 1;                
+            }
+        }  
+    }
+
+
+    ninterior = uniqueC(uvertex, nvert);
+    ninterior = setdiffC(uvertex, ninterior, vertexbound, nbound);   
+    if (ninterior != 0) {
+
+        for (i=0; i<ninterior; i++) {
+            npatch = findindexC(vertex, nvert, uvertex[i], patch);
+            nneighbor = neighborC(patch, npatch, nrow, ncol, 1, neighbor);
+            if (nneighbor > 0) {
+                if(allC(zz, neighbor, nneighbor, zz[patch[0]]) == nneighbor) {
+                    for (j=0; j<npatch; j++) 
+                        maxindex[totalmax + j] = patch[j];
+                        
+                    totalmax = totalmax + npatch;
+                    nmax = nmax + 1;
+                }
+                else if(allC(zz, neighbor, nneighbor, zz[patch[0]]) == -nneighbor) {
+                    for (j=0; j<npatch; j++) 
+                        minindex[totalmin + j] = patch[j];
+                        
+                    totalmin = totalmin + npatch;
+                    nmin = nmin + 1;                
+                }
+            }
+        }   
+    }
+   
+    *nnmax = nmax;
+    *nnmin = nmin;
+    *ttotalmax = totalmax;
+    *ttotalmin = totalmin;
+}
+
+
