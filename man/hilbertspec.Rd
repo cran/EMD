@@ -6,11 +6,12 @@ This function calculates the amplitude and instantaneous frequency
 using Hilbert transform.
 }
 \usage{
-hilbertspec(xt, tt = NULL) 
+hilbertspec(xt, tt=NULL, central=FALSE)
 }
 \arguments{
 \item{xt}{matrix of multiple signals. Each column represents a signal.}
 \item{tt}{observation index or time index}
+\item{central}{If central=TRUE, use central difference method to calculate the instantaneous frequency}
 }
 \details{
 This function calculates the amplitude and instantaneous frequency
@@ -27,6 +28,9 @@ Zheng, Q., Yen, N. C., Tung, C. C. and Liu, H. H. (1998) The empirical
 mode decomposition and Hilbert spectrum for nonlinear and
 nonstationary time series analysis. \emph{Proceedings of the Royal
 Society London A}, \bold{454}, 903--995.
+
+Dasios, A., Astin, T. R. and McCann C. (2001) Compressional-wave Q estimation
+from full-waveform sonic data. \emph{Geophysical Prospecting}, \bold{49}, 353--373. 
 }
 \seealso{
 \code{\link{spectrogram}}.

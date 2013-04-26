@@ -7,7 +7,7 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
     else
         minextrema <- 2
             
-    if ((sm == "spline" || sm == "kernel" || sm == "locfit") & (is.null(spar) || spar == 0)) stop("Provide the smoothing parameter.\n")
+    if ((sm == "spline" || sm == "kernel" || sm == "locfit") & (is.null(spar) || spar == 0)) stop("Provide the smoothing parameter.\n") #|| sm == "quantile"
     #if (sm == "quantile" & is.null(alpha)) stop("Provide the quantile for quantile regression.\n")
         
     ndata <- length(residue); ndatam1 <- ndata - 1 
@@ -188,10 +188,10 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 tmpmax <- predict(fmax, data.frame(xx=ttext[ndata:(n2data-1)]))
             } else if (sm == "locfit") {
                 fmin <- locfit(yy~xx, data=data.frame(xx=ttext[minindex], yy=inputext[minindex]), deg=3, kern="gauss", alpha=spar)
-                tmpmin <- cbind(fmin, predict(f, data.frame(xx=ttext[ndata:(n2data-1)])))
+                tmpmin <- predict(fmin, data.frame(xx=ttext[ndata:(n2data-1)]))
                 
                 fmax <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=input[maxindex]), deg=3, kern="gauss", alpha=spar)
-                tmpmax <- cbind(fmax, predict(f, data.frame(xx=ttext[ndata:(n2data-1)])))
+                tmpmax <- predict(fmax, data.frame(xx=ttext[ndata:(n2data-1)]))
             } 
          
             emin <- cbind(emin, tmpmin[1:ndata])
@@ -246,10 +246,10 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 emaxeven <- predict(fmax, data.frame(xx=ttext[1:ndata]))
             } else if (sm == "locfit") {
                 fmin <- locfit(yy~xx, data=data.frame(xx=ttext[minindex], yy=inputeven[minindex]), deg=3, kern="gauss", alpha=spar)
-                emineven <- cbind(fmin, predict(f, data.frame(xx=ttext[1:ndata])))
+                emineven <- predict(fmin, data.frame(xx=ttext[1:ndata]))
                 
                 fmax <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=inputeven[maxindex]), deg=3, kern="gauss", alpha=spar)
-                emaxeven <- cbind(fmax, predict(f, data.frame(xx=ttext[1:ndata])))             
+                emaxeven <- predict(fmax, data.frame(xx=ttext[1:ndata]))             
             }
             
             inputodd <- c(input, -rev(input), input)
@@ -288,10 +288,10 @@ extractimf <- function(residue, tt=NULL, tol=sd(residue)*0.1^2, max.sift=20,
                 emaxodd <- predict(fmax, data.frame(xx=ttext[1:ndata]))
             } else if (sm == "locfit") {
                 fmin <- locfit(yy~xx, data=data.frame(xx=ttext[minindex], yy=inputodd[minindex]), deg=3, kern="gauss", alpha=spar)
-                eminodd <- cbind(fmin, predict(f, data.frame(xx=ttext[1:ndata])))
+                eminodd <- predict(fmin, data.frame(xx=ttext[1:ndata]))
                 
                 fmax <- locfit(yy~xx, data=data.frame(xx=tt[maxindex], yy=inputodd[maxindex]), deg=3, kern="gauss", alpha=spar)
-                emaxodd <- cbind(fmax, predict(f, data.frame(xx=ttext[1:ndata])))             
+                emaxodd <- predict(fmax, data.frame(xx=ttext[1:ndata]))           
             } 
   
             emin <- cbind(emin, (emineven+eminodd)/2)
@@ -365,7 +365,7 @@ emd <- function(xt, tt=NULL, tol=sd(xt)*0.1^2, max.sift=20, stoprule="type1", bo
         
     if(is.null(interm) || all(interm <= 0)) intermtest <- FALSE else intermtest <- TRUE
 
-    if (sm == "spline" || sm == "kernel" || sm == "locfit") {
+    if (sm == "spline" || sm == "kernel" || sm == "locfit") { #|| sm == "quantile"
         if (is.null(spar) || spar == 0) stop("Provide the smoothing parameter.\n")
         else if (length(spar) == 1)
             spar <- rep(spar, length(smlevels))  

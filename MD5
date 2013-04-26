@@ -1,8 +1,8 @@
-b098317440f9c2695d5ebfde332736c6 *DESCRIPTION
+6335418d8ccfbe4cca2c9c7f3668a35f *DESCRIPTION
 613324507c35b15519284127f38458d6 *NAMESPACE
-3b2c4336eae5004889d6f97a98b83423 *R/EMD1d.R
+78e5d03b48e9d7f76ef765e7a56a3230 *R/EMD1d.R
 ab467d0c29d1cdfcff3988223cd6e7f4 *R/EMD2d.R
-207c08a7d0c36b9b06a2223bf585b92b *R/Hilbert.R
+637c1946cdf5a968945c3374595d4404 *R/Hilbert.R
 a101e733a90cbb1bbf82848273f91983 *data/beryllium.rda
 e9c9b986a1fcdbaad60575b7b8fd866b *data/datalist
 79d30ac997b95721113cdeed4764159c *data/kospi200.rda
@@ -22,7 +22,7 @@ b16d2edb996c40199d0e8cbf8a4ca4a7 *man/extractimf.Rd
 51d3a26f47e2d1911af79b1c42d6bcf9 *man/extractimf2d.Rd
 976e88f6ce20642edaef0c927abb4c89 *man/extrema.Rd
 07cf394a6f7315f86673a93971711459 *man/extrema2dC.Rd
-b045cbb8eec1303c7ae8afc557e0730f *man/hilbertspec.Rd
+17bcf711cd7cb2443b2ee30bad9f52ca *man/hilbertspec.Rd
 88a877fffe3a947297162fd0ed8b45ba *man/imageEMD.Rd
 4e669d68eef935c2757eb2231852305f *man/kospi200.Rd
 12791e352971eff360ea8680993b61a5 *man/lena.Rd

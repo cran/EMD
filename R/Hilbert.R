@@ -26,35 +26,37 @@ unwrap <- function(phase, tol = pi)
     return(unphase)
 }
 
-
-hilbertspec <- function(xt, tt=NULL)
+hilbertspec <- function (xt, tt=NULL, central=FALSE)
 {
-    if(is.null(tt)) tt <- 1:nrow(xt)
+    if (is.null(tt))
+        tt <- 1:nrow(xt)
     deltaT <- diff(tt)
-        
     ndata <- nrow(xt)
     nts <- ncol(xt)
     amplitude <- instantfreq <- energy <- NULL
-    
     for (i in 1:nts) {
         tmpxt <- xt[, i]
-
         htmpxt <- hilbert(tmpxt)
         amplitude <- cbind(amplitude, abs(htmpxt))
-    
-        phase <- atan2(Im(htmpxt), Re(htmpxt))
-        unphase <- unwrap(phase)
-        tmpfreq <- diff(unphase) / deltaT
-        tmpfreq <- abs(tmpfreq[-length(tmpfreq)] + tmpfreq[-1]) / 2
-        tmpfreq <- c(tmpfreq[1], tmpfreq, tmpfreq[length(tmpfreq)])
+        if (central) { #DANIEL BOWMAN and KEEHOON KIM'S EDITS, MARCH 1 2013
+            yt <- Im(htmpxt)
+            dyt <- c((yt[2]-yt[1])/(tt[2]-tt[1]), diff(yt, 2)/diff(tt, 2), (yt[ndata]-yt[ndata-1])/(tt[ndata]-tt[ndata-1]))
+            dxt <- c((tmpxt[2]-tmpxt[1])/(tt[2]-tt[1]), diff(tmpxt, 2)/diff(tt, 2), (tmpxt[ndata]-tmpxt[ndata-1])/(tt[ndata]-tt[ndata-1]))
+            tmpfreq <- (xt*dyt - yt*dxt)/((xt^2) + (yt^2))
+        } else { #DANIEL BOWMAN and KEEHOON KIM'S EDITS, MARCH 1 2013
+            phase <- atan2(Im(htmpxt), Re(htmpxt))
+            unphase <- unwrap(phase)
+            tmpfreq <- diff(unphase)/deltaT
+            tmpfreq <- abs(tmpfreq[-length(tmpfreq)] + tmpfreq[-1])/2
+            tmpfreq <- c(tmpfreq[1], tmpfreq, tmpfreq[length(tmpfreq)])
+        } 
         instantfreq <- cbind(instantfreq, tmpfreq)
         energy <- c(energy, sum(apply(as.matrix(amplitude^2), 1, sum)))
     }
-
-    energy <- energy / sum(apply(amplitude^2, 1, sum)) 
-
-    list(amplitude=amplitude, instantfreq=instantfreq / (2*pi), energy=energy)
+    energy <- energy/sum(apply(amplitude^2, 1, sum))
+    list(amplitude = amplitude, instantfreq = instantfreq/(2 * pi), energy = energy)
 }
+
     
 spectrogram <- function(amplitude, freq, tt=NULL, multi=FALSE, nlevel=NULL, size=NULL) {
 
@@ -104,7 +106,7 @@ image.plot.ts <- function (..., tt, add = FALSE, nlevel = 64, legend.shrink = 0.
     col = tim.colors(nlevel)) 
 {
     old.par <- par(no.readonly = TRUE)
-    info <- image.plot.info(...)
+    info <- imageplot.info(...)
     if (add) {
         big.plot <- old.par$plt
     }
@@ -114,7 +116,7 @@ image.plot.ts <- function (..., tt, add = FALSE, nlevel = 64, legend.shrink = 0.
     if (is.null(legend.mar)) {
         legend.mar <- ifelse(horizontal, 3.1, 5.1)
     }
-    temp <- image.plot.plt(add = add, legend.shrink = legend.shrink, 
+    temp <- imageplot.setup(add = add, legend.shrink = legend.shrink, 
         legend.width = legend.width, legend.mar = legend.mar, 
         horizontal = horizontal, bigplot = bigplot, smallplot = smallplot)
     smallplot <- temp$smallplot
