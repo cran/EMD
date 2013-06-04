@@ -10,7 +10,7 @@ hilbert <- function(xt)
         h[2:(ndata/2)] <- 2
     } else { 
         h[1] <- 1
-        h[2:(ndata+1)/2] <- 2
+        h[2:((ndata+1)/2)] <- 2
     }
     xt <- fft(h * fft(xt), inverse = TRUE) / ndata
     return(xt)

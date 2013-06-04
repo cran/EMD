@@ -60,9 +60,9 @@ Zeng, K and He, M.-X. (2004) A simple boundary process technique for empirical m
 \code{\link{extractimf}}, \code{\link{emd}}.
 }
 \examples{
-ndata <- 2048                                                                                                 
-tt <- seq(0, 9, length=ndata)                                                     
-xt <- sin(pi * tt) + sin(2* pi * tt) + sin(6 * pi * tt)  + 0.5 * tt    
+ndata <- 2048
+tt <- seq(0, 9, length=ndata)                 
+xt <- sin(pi * tt) + sin(2* pi * tt) + sin(6 * pi * tt)  + 0.5 * tt 
 set.seed(1)
 xt <- xt + rnorm(ndata, 0, sd(xt)/5)
 
@@ -71,31 +71,31 @@ xt <- xt + rnorm(ndata, 0, sd(xt)/5)
 ### Empirical Mode Decomposition by Smoothing
 #emdbysm <- semd(xt, tt, cv.kfold=4, boundary="wave", smlevels=1, max.imf=5)
 
-#par(mfcol=c(6,2), mar=c(2,2,2,1), oma=c(0,0,2,0))                                              
+#par(mfcol=c(6,2), mar=c(2,2,2,1), oma=c(0,0,2,0))                              
 #rangext <- range(xt); rangeimf <- rangext - mean(rangext)
 #plot(tt, xt, xlab="", ylab="", main="signal", ylim=rangext, type="l")
 #mtext("Decomposition by EMD", side = 3, line = 2, cex=0.85, font=2)
-#plot(tt, emdbyint$imf[,1], xlab="", ylab="", main="imf 1", ylim=rangeimf,  type="l") 
-#abline(h=0, lty=2) 
-#plot(tt, emdbyint$imf[,2], xlab="", ylab="", main="imf 2", ylim=rangeimf,  type="l") 
+#plot(tt, emdbyint$imf[,1], xlab="", ylab="", main="imf 1", ylim=rangeimf,  type="l")
+#abline(h=0, lty=2)
+#plot(tt, emdbyint$imf[,2], xlab="", ylab="", main="imf 2", ylim=rangeimf,  type="l")
 #abline(h=0, lty=2)
 #plot(tt, emdbyint$imf[,3], xlab="", ylab="", main="imf 3", ylim=rangeimf,  type="l")
-#abline(h=0, lty=2) 
+#abline(h=0, lty=2)
 #plot(tt, emdbyint$imf[,4], xlab="", ylab="", main="imf 4", ylim=rangeimf,  type="l")
 #abline(h=0, lty=2)
-#plot(tt, emdbyint$imf[,5]+emdbyint$residue, xlab="", ylab="", main="remaining signal", 
+#plot(tt, emdbyint$imf[,5]+emdbyint$residue, xlab="", ylab="", main="remaining signal",
 #    ylim=rangext, type="l")
 
 #plot(tt, xt, xlab="", ylab="", main="signal", ylim=rangext, type="l")
 #mtext("Decomposition by SEMD", side = 3, line = 2, cex=0.85, font=2)
 #plot(tt, emdbysm$imf[,1], xlab="", ylab="", main="noise", ylim=rangeimf,  type="l")
-#abline(h=0, lty=2) 
+#abline(h=0, lty=2)
 #plot(tt, emdbysm$imf[,2], xlab="", ylab="", main="imf 1", ylim=rangeimf,  type="l")
-#abline(h=0, lty=2) 
+#abline(h=0, lty=2)
 #plot(tt, emdbysm$imf[,3], xlab="", ylab="", main="imf 2", ylim=rangeimf,  type="l")
-#abline(h=0, lty=2) 
+#abline(h=0, lty=2)
 #plot(tt, emdbysm$imf[,4], xlab="", ylab="", main="imf 3", ylim=rangeimf,  type="l")
-#abline(h=0, lty=2) 
+#abline(h=0, lty=2)
 #plot(tt, emdbysm$residue, xlab="", ylab="", main="residue", ylim=rangext, type="l")
 }
 \keyword{nonparametric}
