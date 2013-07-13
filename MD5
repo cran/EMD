@@ -1,4 +1,4 @@
-9a5578ca3267e4c0be242148b06d2c93 *DESCRIPTION
+6c5529dd46559b7395dc6a91e7fe845d *DESCRIPTION
 613324507c35b15519284127f38458d6 *NAMESPACE
 78e5d03b48e9d7f76ef765e7a56a3230 *R/EMD1d.R
 ab467d0c29d1cdfcff3988223cd6e7f4 *R/EMD2d.R
@@ -18,7 +18,7 @@ f6300e3b5bec1939dc59ff90d84ec447 *man/cvtype.Rd
 01015356eb41afcfacad732dbde2a27f *man/emd.pred.Rd
 e731cc20ece0fd79d17a9b2dae8c3672 *man/emd2d.Rd
 4f66aaf52bd201bdf5bd3a60fb6c7143 *man/emddenoise.Rd
-b16d2edb996c40199d0e8cbf8a4ca4a7 *man/extractimf.Rd
+664f0ae06431e34991ff09638a319fa4 *man/extractimf.Rd
 51d3a26f47e2d1911af79b1c42d6bcf9 *man/extractimf2d.Rd
 976e88f6ce20642edaef0c927abb4c89 *man/extrema.Rd
 07cf394a6f7315f86673a93971711459 *man/extrema2dC.Rd

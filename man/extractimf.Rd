@@ -59,7 +59,7 @@ Zeng, K and He, M.-X. (2004) A simple boundary process technique for empirical m
 \examples{
 ### Generating a signal
 ndata <- 3000
-X11(); par(mfrow=c(1,1), mar=c(1,1,1,1))
+par(mfrow=c(1,1), mar=c(1,1,1,1))
 tt2 <- seq(0, 9, length=ndata)
 xt2 <- sin(pi * tt2) + sin(2* pi * tt2) + sin(6 * pi * tt2)  + 0.5 * tt2
 plot(tt2, xt2, xlab="", ylab="", type="l", axes=FALSE); box()
