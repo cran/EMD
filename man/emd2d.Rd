@@ -46,7 +46,7 @@ mode decomposition and Hilbert spectrum for nonlinear and
 nonstationary time series analysis. \emph{Proceedings of the Royal
 Society London A}, \bold{454}, 903--995.
 
-Kim, D., Park, M. and Oh, H.-S. (2012) Bidimensional Statistical Empirical Mode Decomposition. \emph{IEEE Signal Prosessing Letters}, 
+Kim, D., Park, M. and Oh, H.-S. (2012) Bidimensional Statistical Empirical Mode Decomposition. \emph{IEEE Signal Processing Letters}, 
 \bold{19}, 191--194, doi: 10.1109/LSP.2012.2186566.
 }
 \seealso{

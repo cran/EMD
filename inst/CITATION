@@ -1,0 +1,48 @@
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+
+citHeader(paste0("To cite references in publications use 2009 and ", year, " for package 'EMD', 2012a for one-dimensional statistical EMD, and 2012b for bidimensional statistical EMD."))
+
+citEntry(
+ entry="Article",
+ title="EMD: A Package for Empirical Mode Decomposition and Hilbert Spectrum",
+ journal="The R Journal",
+ volume= "1",
+ number="1",
+ pages="40-46",
+ year="2009",
+ author="Donghoh Kim and Hee-Seok Oh",
+ textVersion="Donghoh Kim and Hee-Seok Oh (2009) EMD: A Package for Empirical Mode Decomposition and Hilbert Spectrum. The R Journal, 1, 40-46." )
+
+citEntry(
+ entry="Article",
+ title="Extending the Scope of Empirical Mode Decomposition using Smoothing",
+ journal="EURASIP Journal on Advances in Signal Processing",
+ volume= "2012:168",
+ pages="1-17",
+ year="2012",
+ author="Donghoh Kim and Kyungmee O Kim and Hee-Seok Oh",
+ textVersion="Donghoh Kim, Kyungmee O Kim and Hee-Seok Oh (2012a) Extending the Scope of Empirical Mode Decomposition using Smoothing. EURASIP Journal on Advances in Signal Processing, 2012:168." )
+
+citEntry(
+ entry="Article",
+ title="Bidimensional Statistical Empirical Mode Decomposition",
+ journal="IEEE Signal Processing Letters",
+ volume= "19",
+ pages="191-194",
+ year="2012",
+ author="Donghoh Kim and Minjeong Park and Hee-Seok Oh",
+ textVersion="Donghoh Kim, Minjeong Park and Hee-Seok Oh (2012b) Bidimensional Statistical Empirical Mode Decomposition. IEEE Signal Processing Letters, 19, 191-194." )
+
+citEntry(entry = "Manual",
+         title = "EMD: Empirical Mode Decomposition and Hilbert Spectral Analysis",
+         author = personList(as.person("Donghoh Kim"),
+                             as.person("Hee-Seok Oh")),
+         year = year,
+         note = vers,
+
+         textVersion =
+         paste0("Donghoh Kim and Hee-Seok Oh (",
+                year,
+                ") EMD: Empirical Mode Decomposition and Hilbert Spectral Analysis. ",
+                vers, "."))

@@ -22,7 +22,7 @@ on the equivalence relation between neighboring pixels. See Kim et al. (2012) fo
 \item{maxindex}{index of maxima. Each row specifies index of local maximum.}
 }
 \references{
-Kim, D., Park, M. and Oh, H.-S. (2012) Bidimensional Statistical Empirical Mode Decomposition. \emph{IEEE Signal Prosessing Letters}, 
+Kim, D., Park, M. and Oh, H.-S. (2012) Bidimensional Statistical Empirical Mode Decomposition. \emph{IEEE Signal Processing Letters}, 
 \bold{19}, 191--194, doi: 10.1109/LSP.2012.2186566.
 }
 \seealso{

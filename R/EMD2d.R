@@ -148,13 +148,13 @@ function (residue, x = NULL, y = NULL, nnrow = nrow(residue),
         if (sm == "Tps") {
         fmin <- Tps(xx[minindex, ], input[minindex])
         fmax <- Tps(xx[maxindex, ], input[maxindex])
-        emin <- predict.surface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
-        emax <- predict.surface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
+        emin <- predictSurface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
+        emax <- predictSurface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
         } else if (sm == "mKrig" || sm == "none") {
         fmin <- mKrig(xx[minindex, ], input[minindex], lambda=spar)
         fmax <- mKrig(xx[maxindex, ], input[maxindex], lambda=spar)        
-        emin <- predict.surface(fmin, grid.list = list(x, y), extrap = TRUE)$z
-        emax <- predict.surface(fmax, grid.list = list(x, y), extrap = TRUE)$z
+        emin <- predictSurface(fmin, grid.list = list(x, y), extrap = TRUE)$z
+        emax <- predictSurface(fmax, grid.list = list(x, y), extrap = TRUE)$z
         } else if (sm == "locfit") {
         fmin <- locfit(input[minindex] ~ xx[minindex, ], deg=3, kern="gauss", alpha=spar)
         fmax <- locfit(input[maxindex] ~ xx[maxindex, ], deg=3, kern="gauss", alpha=spar)      
@@ -168,11 +168,11 @@ function (residue, x = NULL, y = NULL, nnrow = nrow(residue),
         }
         
         #if (sm == "none") {
-        #    emin <- predict.surface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
-        #    emax <- predict.surface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
+        #    emin <- predictSurface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
+        #    emax <- predictSurface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
         #} else if (sm == "Tps") {
-        #    emin <- predict.surface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
-        #    emax <- predict.surface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
+        #    emin <- predictSurface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
+        #    emax <- predictSurface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
         #}
         em <- (emin + emax)/2
         if (check) {
