@@ -20,7 +20,9 @@ This function draws plots of input image, IMF's, residue and extrema.
 data(lena)
 z <- lena[seq(1, 512, by=4), seq(1, 512, by=4)]
 image(z, main="Lena", xlab="", ylab="", col=gray(0:100/100), axes=FALSE)
-#lenadecom <- emd2d(z, max.imf = 4)
-#imageEMD(z=z, emdz=lenadecom, extrema=TRUE, col=gray(0:100/100))
+
+\dontrun{
+lenadecom <- emd2d(z, max.imf = 4)
+imageEMD(z=z, emdz=lenadecom, extrema=TRUE, col=gray(0:100/100))}
 }
 \keyword{nonparametric}

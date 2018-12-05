@@ -2,9 +2,12 @@
 exportPattern(".")
 
 # Import all packages listed as Imports or Depends
-import(
-  fields,
-  locfit
-)
+import(fields, locfit)
 
-useDynLib(EMD)
+importFrom("grDevices", "gray")
+importFrom("graphics", "abline", "axis", "axis.POSIXct", "box",
+             "image", "lines", "locator", "par", "plot", "points")
+importFrom("stats", "embed", "fft", "is.ts", "loess", "loess.control",
+             "predict", "qt", "sd", "splinefun", "ts")
+
+useDynLib(EMD, .registration = TRUE, .fixes = "C_")

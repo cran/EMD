@@ -821,4 +821,16 @@ void extrema2dVC(double *zz, int *nnrow, int *nncol,
     *ttotalmin = totalmin;
 }
 
+#include <R_ext/Rdynload.h>
+
+static const R_CMethodDef cMethods[] = {
+    {"extrema2dC", (DL_FUNC) &extrema2dC, 9},
+    {NULL, NULL, 0}
+};
+
+void R_init_EMD(DllInfo *info)
+{
+    R_registerRoutines(info, cMethods, NULL, NULL, NULL);
+    R_useDynamicSymbols(info, FALSE);
+}
 

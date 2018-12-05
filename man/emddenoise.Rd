@@ -71,7 +71,14 @@ rnorm(sum(tt<=6 & tt>3), 0, sigma[2]), rnorm(sum(tt>6), 0, sigma[3]))
 xt <- meanf + error 
 
 cv.index <- cvtype(n=ndata, cv.kfold=2, cv.random=FALSE)$cv.index 
-#try10 <- emddenoise(xt, cv.index=cv.index, cv.level=2, by.imf=TRUE)
-#try10$optlambda
+
+\dontrun{
+try10 <- emddenoise(xt, cv.index=cv.index, cv.level=2, by.imf=TRUE)
+
+par(mfrow=c(2, 1), mar=c(2, 1, 2, 1))
+plot(xt, type="l", main="noisy signal")
+lines(meanf, lty=2)
+plot(try10$dxt, type="l", main="denoised signal")
+lines(meanf, lty=2)}
 }
 \keyword{nonparametric}

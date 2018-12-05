@@ -85,14 +85,14 @@ spectrogram <- function(amplitude, freq, tt=NULL, multi=FALSE, nlevel=NULL, size
         tmpim <- as.image(c(totamp), x = totfreq, nrow = nnrow, ncol = nncol)
         #tmpim$z[is.na(tmpim$z)] <- 0
         #tmpim$z <- scale(tmpim$z)
-        image.plot.ts(tmpim, tt = tt, col = gray(nlevel:0/nlevel), ylim = rangefreq, zlim = rangeamp)  
+        imageplot.ts(tmpim, tt = tt, col = gray(nlevel:0/nlevel), ylim = rangefreq, zlim = rangeamp)  
         box()
     } else {
         if (nseries != 1) par(mfrow=c(nseries %/% 2 + nseries %% 2, 2), mar = c(4, 4, 1, 4) + 0.1)
         for (i in 1:nseries) {
             tmpim <- as.image(amplitude[, i], x = cbind(tt, freq[, i]), nrow = nnrow, ncol = nncol)
             #tmpim$z <- scale(tmpim$z)
-            image.plot.ts(tmpim, tt=tt, col = gray(nlevel:0/nlevel), ylim = rangefreq, zlim = range(amplitude[, i]))
+            imageplot.ts(tmpim, tt=tt, col = gray(nlevel:0/nlevel), ylim = rangefreq, zlim = range(amplitude[, i]))
             box()
         }    
     }
@@ -100,7 +100,7 @@ spectrogram <- function(amplitude, freq, tt=NULL, multi=FALSE, nlevel=NULL, size
 
 
 
-image.plot.ts <- function (..., tt, add = FALSE, nlevel = 64, legend.shrink = 0.9, 
+imageplot.ts <- function (..., tt, add = FALSE, nlevel = 64, legend.shrink = 0.9, 
     legend.width = 1.2, legend.mar = NULL, graphics.reset = FALSE, 
     horizontal = FALSE, bigplot = NULL, smallplot = NULL, legend.only = FALSE, 
     col = tim.colors(nlevel)) 

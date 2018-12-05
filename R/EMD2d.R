@@ -9,8 +9,8 @@ extrema2dC <- function(z, nnrow=nrow(z), nncol=ncol(z)) {
     minindex <- integer(nnrow*nncol)   
     nmin <- as.integer(0)   
     totalmin <- as.integer(0)      
-    thetime <- unix.time(
-    out <- .C("extrema2dC",
+    thetime <- system.time(
+    out <- .C(C_extrema2dC,
         z=z,
         nnrow=nnrow,
         nncol=nncol,
@@ -19,9 +19,8 @@ extrema2dC <- function(z, nnrow=nrow(z), nncol=ncol(z)) {
         totalmax=totalmax,
         minindex=minindex,
         nmin=nmin,
-        totalmin=totalmin,
-        #vertex=integer(nnrow*nncol),
-        PACKAGE="EMD"))
+        totalmin=totalmin))
+        #vertex=integer(nnrow*nncol)))
     out$time <- thetime
     out$maxindex <- out$maxindex + 1
     out$minindex <- out$minindex + 1
@@ -49,7 +48,7 @@ extrema2dVC <- function(z, nnrow=nrow(z), nncol=ncol(z)) {
     minindex <- integer(nnrow*nncol)   
     nmin <- as.integer(0)   
     totalmin <- as.integer(0)      
-    thetime <- unix.time(
+    thetime <- system.time(
     out <- .C("extrema2dVC",
         z=z,
         nnrow=nnrow,

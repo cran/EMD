@@ -57,6 +57,7 @@ Kim, D., Park, M. and Oh, H.-S. (2012) Bidimensional Statistical Empirical Mode 
 data(lena)
 z <- lena[seq(1, 512, by=4), seq(1, 512, by=4)]
 
-#lenaimf1 <- extractimf2d(z, check=FALSE)
+\dontrun{
+lenaimf1 <- extractimf2d(z, check=FALSE)}
 }
 \keyword{nonparametric}

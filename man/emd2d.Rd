@@ -56,8 +56,10 @@ Kim, D., Park, M. and Oh, H.-S. (2012) Bidimensional Statistical Empirical Mode 
 data(lena)
 z <- lena[seq(1, 512, by=4), seq(1, 512, by=4)]
 image(z, main="Lena", xlab="", ylab="", col=gray(0:100/100), axes=FALSE)
-#lenadecom <- emd2d(z, max.imf = 4)
-#imageEMD(z=z, emdz=lenadecom, extrema=TRUE, col=gray(0:100/100))
+
+\dontrun{
+lenadecom <- emd2d(z, max.imf = 4)
+imageEMD(z=z, emdz=lenadecom, extrema=TRUE, col=gray(0:100/100))}
 
 ### Test Image
 ndata <- 128
@@ -80,10 +82,11 @@ image(meanf2, main="low frequency component", xlab="", ylab="", zlim=rangezn,
 image(meanf, main="test image", xlab="", ylab="", zlim=rangezn, col=gray(100:0/100), axes=FALSE)
 image(zn, main="noisy image", xlab="", ylab="", zlim=rangezn, col=gray(100:0/100), axes=FALSE)
 
-#out <- emd2d(zn, max.imf=3, sm="locfit", smlevels=1, spar=0.004125)
-#par(mfcol=c(3,1), mar=0.1 + c(0, 0.25, 0.25, 0.25)) 
-#image(out$imf[[1]], main="", xlab="", ylab="", col=gray(100:0/100), zlim=rangezn, axes=FALSE)
-#image(out$imf[[2]], main="", xlab="", ylab="", col=gray(100:0/100), zlim=rangezn, axes=FALSE)
-#image(out$imf[[3]], main="", xlab="", ylab="", col=gray(100:0/100), zlim=rangezn, axes=FALSE)
+\dontrun{
+out <- emd2d(zn, max.imf=3, sm="locfit", smlevels=1, spar=0.004125)
+par(mfcol=c(3,1), mar=0.1 + c(0, 0.25, 0.25, 0.25)) 
+image(out$imf[[1]], main="", xlab="", ylab="", col=gray(100:0/100), zlim=rangezn, axes=FALSE)
+image(out$imf[[2]], main="", xlab="", ylab="", col=gray(100:0/100), zlim=rangezn, axes=FALSE)
+image(out$imf[[3]], main="", xlab="", ylab="", col=gray(100:0/100), zlim=rangezn, axes=FALSE)}
 }
 \keyword{nonparametric}
