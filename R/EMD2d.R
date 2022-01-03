@@ -155,8 +155,8 @@ function (residue, x = NULL, y = NULL, nnrow = nrow(residue),
         emin <- predictSurface(fmin, grid.list = list(x, y), extrap = TRUE)$z
         emax <- predictSurface(fmax, grid.list = list(x, y), extrap = TRUE)$z
         } else if (sm == "locfit") {
-        fmin <- locfit(input[minindex] ~ xx[minindex, ], deg=3, kern="gauss", alpha=spar)
-        fmax <- locfit(input[maxindex] ~ xx[maxindex, ], deg=3, kern="gauss", alpha=spar)      
+        fmin <- locfit(input[minindex] ~ xx[minindex, ], deg=3, kern="gauss", alpha=spar, maxk=500)
+        fmax <- locfit(input[maxindex] ~ xx[maxindex, ], deg=3, kern="gauss", alpha=spar, maxk=500)     
         emin <- predict(fmin, xx)
         emax <- predict(fmax, xx)
         } else if (sm == "loess") {
@@ -165,7 +165,7 @@ function (residue, x = NULL, y = NULL, nnrow = nrow(residue),
         emin <- predict(fmin, xx)
         emax <- predict(fmax, xx)
         }
-        
+       
         #if (sm == "none") {
         #    emin <- predictSurface(fmin, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
         #    emax <- predictSurface(fmax, grid.list = list(x, y), extrap = TRUE, lambda = spar)$z
